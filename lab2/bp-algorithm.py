@@ -15,9 +15,9 @@ df['target']=list(iris.target)
 X=df.iloc[:,0:4]
 Y=df.iloc[:,4]
 print(df)
-#对df进行划分，一共五项数据，前四项是特征为x，第五项是tag为y
+#对 df 进行划分，一共五项数据，前四项是特征为 x，第五项是 tag 为 y
 
-X_train,X_test,Y_train,Y_test=train_test_split(X,Y,train_size=0.8,random_state=22111606)#以22111606为随机种子对数据集进行要求比例的可复现随机划分
+X_train,X_test,Y_train,Y_test=train_test_split(X,Y,train_size=0.8,random_state=22111606)#以 22111606 为随机种子对数据集进行要求比例的可复现随机划分
 #正规化
 sc=StandardScaler()
 sc.fit(X)
@@ -41,17 +41,17 @@ standard_test = sc.transform(X_test)
 # plt.ylabel('petal_w')
 # plt.grid()
 
-#构建mlp模型
+#构建 mlp 模型
 mlp = MLPClassifier(hidden_layer_sizes=(10,10), max_iter=2000, activation='tanh',solver='adam', alpha=0.005, batch_size='auto', learning_rate='constant', learning_rate_init=0.01,shuffle=True, random_state=22111606, tol=0.00001, verbose=False)
 
-mlp.fit(standard_train,Y_train)#用正规化后的数据与tag进行训练
+mlp.fit(standard_train,Y_train)#用正规化后的数据与 tag 进行训练
 
 result = mlp.predict(standard_test)#用训练得到的模型和验证集进行计算
 
 
 #查看模型结果
-print("测试集合的y值   ：",list(Y_test))
-print("神经网络预测的y值：",list(result))
+print("测试集合的 y 值：",list(Y_test))
+print("神经网络预测的 y 值：",list(result))
 print("预测的准确率为：",mlp.score(standard_test,Y_test))
 print("层数为：",mlp.n_layers_)
 print("迭代次数为：",mlp.n_iter_)
@@ -83,15 +83,15 @@ class NeuralNetwork:
         self.bias_output = np.zeros((1, self.output_size))
 
     #sigmoid(x) = 1/(1+e^-x)
-   def sigmoid(self, x): #sigmoid计算方式
+   def sigmoid(self, x): #sigmoid 计算方式
        return 1/(1+np.exp(-x))
     # sigmoid'(x) = (1-sigmoid(x))sigmoid(x)
-   def sigmoid_derivative(self, x): #sigmoid导数计算方式
+   def sigmoid_derivative(self, x): #sigmoid 导数计算方式
        return (1.0-self.sigmoid(x))*self.sigmoid(x)
 
    def forward(self, X):
        a1 = np.dot(X,self.weights_input_hidden) + self.bias_hidden #直接用权重和偏置计算得到的结果
-       z1 = self.sigmoid(a1)    #用sigmoid转化后的概率，下同
+       z1 = self.sigmoid(a1)    #用 sigmoid 转化后的概率，下同
        a2 = np.dot(z1,self.weights_hidden_output) + self.bias_output
        y  = self.sigmoid(a2)
        return y
@@ -109,7 +109,7 @@ class NeuralNetwork:
        grads['bias_output'] = np.sum(dy,axis=0)
        grads['weights_input_hidden'] = np.dot(X.T,dz1)
        grads['bias_hidden'] = np.sum(dz1,axis=0)
-       #更新params
+       #更新 params
        self.weights_hidden_output -= learning_rate* grads['weights_hidden_output']
        self.bias_output -= learning_rate* grads['bias_output']
        self.weights_input_hidden -= learning_rate* grads['weights_input_hidden']
@@ -122,7 +122,7 @@ class NeuralNetwork:
            self.backward(X, y, output, learning_rate)
            if epoch % 100 == 0:
                print(f"Epoch {epoch + 1}, Loss: {loss}")
-            #训练epoch次且每一百次输出对应loss
+            #训练 epoch 次且每一百次输出对应 loss
 
    def predict(self, X):
        return np.round(self.forward(X))#预测结果且取整数
@@ -143,7 +143,7 @@ output_size = len(np.unique(Y_train))  # 根据训练集标签确定输出层大
 nn = NeuralNetwork(input_size, hidden_size, output_size)
 
 # 将标签转换为独热编码
-Y_train_encoded = one_hot_encode(Y_train)#用独热码标识正确tag再用于监督学习
+Y_train_encoded = one_hot_encode(Y_train)#用独热码标识正确 tag 再用于监督学习
 
 # 训练神经网络
 print('training.......')
@@ -156,6 +156,6 @@ predictions = nn.predict(standard_test)
 accuracy = accuracy_score(Y_test, np.argmax(predictions, axis=1))
 
 # 查看模型结果
-print("测试集合的y值：", list(Y_test))
-print("神经网络预测的的y值：", list(np.argmax(predictions, axis=1)))
+print("测试集合的 y 值：", list(Y_test))
+print("神经网络预测的的 y 值：", list(np.argmax(predictions, axis=1)))
 print("预测的准确率为：", accuracy)
