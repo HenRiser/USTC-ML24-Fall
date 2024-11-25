@@ -10,7 +10,7 @@ from model import BaseModel
 import os
 import pickle
 
-from utils import(
+from utils import (
     TrainConfigR,
     TrainConfigC,
     DataLoader,
@@ -23,10 +23,11 @@ from utils import(
 
 # You can add more imports if needed
 
+
 # 1.1
 def data_preprocessing_regression(data_path: str, saved_to_disk: bool = False) -> Dataset:
     r"""Load and preprocess the training data for the regression task.
-    
+
     Args:
         data_path (str): The path to the training data.If you are using a dataset saved with save_to_disk(), you can use load_from_disk() to load the dataset.
 
@@ -45,6 +46,7 @@ def data_preprocessing_regression(data_path: str, saved_to_disk: bool = False) -
     dataset['Run_time'] = np.log10(dataset['Run_time']) #取对数
     dataset = Dataset.from_pandas(dataset) # Convert the pandas DataFrame back to a dataset
     return dataset
+
 
 def data_split_regression(dataset: Dataset, batch_size: int, shuffle: bool) -> Tuple[DataLoader]:
     r"""Split the dataset and make it ready for training.
@@ -72,6 +74,7 @@ def data_split_regression(dataset: Dataset, batch_size: int, shuffle: bool) -> T
     return add_dataloader, test_dataloder
     return all_dataloader,test_dataloder#all dataset i can see
 
+
 # 1.2
 class LinearRegression(BaseModel):
     r"""A simple linear regression model.
@@ -80,7 +83,7 @@ class LinearRegression(BaseModel):
     an output shaped as [batch_size, out_features].
 
     For each sample [1, in_features], the model computes the output as:
-    
+
     .. math::
         y = xW + b
 
@@ -100,18 +103,20 @@ class LinearRegression(BaseModel):
         >>> state_dict = model.state_dict()
         >>> save(state_dict, 'model.pkl')
     """
+
     def __init__(self, in_features: int, out_features: int):
         super().__init__()
         # 1.2-a
         # Look up the definition of BaseModel and Parameter in the utils.py file, and use them to register the parameters
         self._parameters["weight"] = np.array([0.017]*in_features)
         self._parameters["bias"] = np.array([0.99]*out_features)
-    
+
     def predict(self, x: np.ndarray) -> np.ndarray:
         # 1.2-b
         # Implement the forward pass of the model
 
         return np.array(np.dot(x,self._parameters["weight"])+self._parameters["bias"])
+
 
 # 1.3
 class MSELoss(Loss):
@@ -123,9 +128,10 @@ class MSELoss(Loss):
         __call__: Compute the loss
         backward: Compute the gradients of the loss with respect to the parameters
     """
+
     def __call__(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         r"""Compute the mean squared error loss.
-        
+
         Args:
             y_pred: The predicted values
             y_true: The true values
@@ -140,10 +146,10 @@ class MSELoss(Loss):
         for y in y_error:
             sum +=y* y
         return sum/len(y_error)
-    
+
     def backward(self, x: np.ndarray, y_pred: np.ndarray, y_true: np.ndarray) -> dict[str, np.ndarray]:
         r"""Compute the gradients of the loss with respect to the parameters.
-        
+
         Args:
             x: The input values [batch_size, in_features][4096,14]
             y_pred: The predicted values [batch_size, out_features][4096,1]
@@ -191,12 +197,21 @@ class TrainerR:
         train: Train the model
         save_model: Save the model
     """
-    def __init__(self, model: BaseModel, train_loader: DataLoader, loss: Loss, optimizer: SGD, config: TrainConfigR, results_path: Path):
+
+    def __init__(
+        self,
+        model: BaseModel,
+        train_loader: DataLoader,
+        loss: Loss,
+        optimizer: SGD,
+        config: TrainConfigR,
+        results_path: Path,
+    ):
         self.model = model
         self.train_loader = train_loader
         self.criterion = loss
         self.opt = optimizer
-        self.cfg= config
+        self.cfg = config
         self.results_path = results_path
         self.step = 0
         self.train_num_steps = len(self.train_loader) * self.cfg.epochs#batch_num * train_time
@@ -230,20 +245,21 @@ class TrainerR:
                 self.opt.step(grad)
                 self.step += 1
                 pbar.update()
-        
+
         plt.plot(loss_list)
-        plt.xlabel('Steps')
-        plt.ylabel('Loss')
-        plt.savefig(self.results_path / 'loss_list.png')
+        plt.xlabel("Steps")
+        plt.ylabel("Loss")
+        plt.savefig(self.results_path / "loss_list.png")
         self.save_model()
 
     def save_model(self):
         self.model.eval()
         save(self.model.state_dict(), self.checkpoint_path)
         print(f"Model saved to {self.checkpoint_path}")
-        
+
+
 # 1.6
-def eval_LinearRegression(model: LinearRegression, loader: DataLoader) -> Tuple[float,float]:
+def eval_LinearRegression(model: LinearRegression, loader: DataLoader) -> Tuple[float, float]:
     r"""Evaluate the model on the given data.
 
     Args:
@@ -278,11 +294,11 @@ def eval_LinearRegression(model: LinearRegression, loader: DataLoader) -> Tuple[
     # Compute the mean Run_time as Output
     # You can alse compute MSE and relative error
     # TODO: Compute metrics
-    print(f"Mean Squared Error: {y_error}")
+     print(f"Mean Squared Error: {y_error}")
 
-    #print(mu_target)
+    # print(mu_target)
 
-    #print(f"Relative Error: {relative_error}")
+    # print(f"Relative Error: {relative_error}")
     return np.mean(y_pred_sum)/len(loader)/len(y_pred),y_error
 
     return NotImplementedError
@@ -291,7 +307,7 @@ def eval_LinearRegression(model: LinearRegression, loader: DataLoader) -> Tuple[
 # 2.1
 def data_preprocessing_classification(data_path: str, mean: float, saved_to_disk: bool = False) -> Dataset:
     r"""Load and preprocess the training data for the classification task.
-    
+
     Args:
         data_path (str): The path to the training data.If you are using a dataset saved with save_to_disk(), you can use load_from_disk() to load the dataset.
         mean (float): The mean value to classify the data.
@@ -325,6 +341,7 @@ def data_preprocessing_classification(data_path: str, mean: float, saved_to_disk
     # return test_dataset#test
     return concatenate_datasets([train_dataset,validation_dataset]) #train
 
+
 def data_split_classification(dataset: Dataset) -> Tuple[Dataset]:
     r"""Split the dataset and make it ready for training.
 
@@ -345,6 +362,7 @@ def data_split_classification(dataset: Dataset) -> Tuple[Dataset]:
     # return train_dataset,validation_dataset#0.8 for training
     # return concatenate_datasets(train_dataset,validation_dataset),test_dataset #after add
     return dataset,test_dataset #all i can see
+
 
 # 2.2
 class LogisticRegression(BaseModel):
@@ -368,7 +386,7 @@ class LogisticRegression(BaseModel):
         in_features (int): Number of input features.
 
     Example::
-    
+
             >>> from model import LogisticRegression
             >>> # Define the model
             >>> model = LogisticRegression(3)
@@ -379,6 +397,7 @@ class LogisticRegression(BaseModel):
             >>> state_dict = model.state_dict()
             >>> save(state_dict, 'model.pkl')
     """
+
     def __init__(self, in_features: int):
         super().__init__()
         # 2.2-a
@@ -386,7 +405,6 @@ class LogisticRegression(BaseModel):
         # This time, you should combine the weights and bias into a single parameter
         # TODO: Register the parameters
         self.beta = Parameter(np.random.randn(in_features+1,1)*0.001)
-
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         r"""Predict the probability of the input belonging to class 1.
@@ -417,9 +435,10 @@ class BCELoss(Loss):
         __call__: Compute the loss
         backward: Compute the gradients of the loss with respect to the parameters
     """
+
     def __call__(self, y_pred: np.ndarray, y_true: np.ndarray) -> float:
         r"""Compute the binary cross entropy loss.
-        
+
         Args:
             y_pred: The predicted values
             y_true: The true values
@@ -437,7 +456,7 @@ class BCELoss(Loss):
     
     def backward(self, x: np.ndarray, y_pred: np.ndarray, y_true: np.ndarray) -> dict[str, np.ndarray]:
         r"""Compute the gradients of the loss with respect to the parameters.
-        
+
         Args:
             x: The input values [batch_size, in_features]
             y_pred: The predicted values [batch_size, out_features]
@@ -465,15 +484,18 @@ class TrainerC:
         config (dict): The configuration
         results_path (Path): The path to save the results
     """
-    def __init__(self, model: BaseModel, dataset: np.ndarray, loss: Loss, optimizer: GD, config: TrainConfigC, results_path: Path):
+
+    def __init__(
+        self, model: BaseModel, dataset: np.ndarray, loss: Loss, optimizer: GD, config: TrainConfigC, results_path: Path
+    ):
         self.model = model
         self.dataset = dataset
         self.criterion = loss
         self.opt = optimizer
-        self.cfg= config
+        self.cfg = config
         self.results_path = results_path
         self.step = 0
-        self.train_num_steps =  self.cfg.steps
+        self.train_num_steps = self.cfg.steps
         self.checkpoint_path = self.results_path / "model.pkl"
 
         self.results_path.mkdir(parents=True, exist_ok=True)
@@ -526,16 +548,17 @@ class TrainerC:
                 self.step += 1
                 pbar.update()
 
-        with open(self.results_path / 'loss_list.txt', 'w') as f:
+        with open(self.results_path / "loss_list.txt", "w") as f:
             print(loss_list, file=f)
         plt.plot(loss_list)
-        plt.savefig(self.results_path / 'loss_list.png')
+        plt.savefig(self.results_path / "loss_list.png")
         self.save_model()
 
     def save_model(self):
         self.model.eval()
         save(self.model.state_dict(), self.checkpoint_path)
         print(f"Model saved to {self.checkpoint_path}")
+
 
 # 2.6
 def eval_LogisticRegression(model: LogisticRegression, dataset: np.ndarray) -> float:

@@ -21,8 +21,8 @@ X_train,X_test,Y_train,Y_test=train_test_split(X,Y,train_size=0.8,random_state=2
 #正规化
 sc=StandardScaler()
 sc.fit(X)
-standard_train=sc.transform(X_train)
-standard_test=sc.transform(X_test)
+standard_train = sc.transform(X_train)
+standard_test = sc.transform(X_test)
 
 #可视化
 # plt.figure(figsize=(12, 5))
@@ -57,21 +57,30 @@ print("层数为：",mlp.n_layers_)
 print("迭代次数为：",mlp.n_iter_)
 print("损失为：",mlp.loss_)
 print("激活函数为：",mlp.out_activation_)
+# 查看模型结果
+print("测试集合的 y 值：", list(Y_test))
+print("神经网络预测的的 y 值：", list(result))
+print("预测的准确率为：", mlp.score(standard_test, Y_test))
+print("层数为：", mlp.n_layers_)
+print("迭代次数为：", mlp.n_iter_)
+print("损失为：", mlp.loss_)
+print("激活函数为：", mlp.out_activation_)
+
 
 #代码的手动实现
 class NeuralNetwork:
-   def __init__(self, input_size, hidden_size, output_size):
-       self.input_size = input_size
-       self.hidden_size = hidden_size
-       self.output_size = output_size
+    def __init__(self, input_size, hidden_size, output_size):
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
 
-       # 初始化权重
-       self.weights_input_hidden = np.random.randn(self.input_size, self.hidden_size)
-       self.weights_hidden_output = np.random.randn(self.hidden_size, self.output_size)
+        # 初始化权重
+        self.weights_input_hidden = np.random.randn(self.input_size, self.hidden_size)
+        self.weights_hidden_output = np.random.randn(self.hidden_size, self.output_size)
 
-       # 初始化偏置
-       self.bias_hidden = np.zeros((1, self.hidden_size))
-       self.bias_output = np.zeros((1, self.output_size))
+        # 初始化偏置
+        self.bias_hidden = np.zeros((1, self.hidden_size))
+        self.bias_output = np.zeros((1, self.output_size))
 
     #sigmoid(x) = 1/(1+e^-x)
    def sigmoid(self, x): #sigmoid计算方式
@@ -121,11 +130,11 @@ class NeuralNetwork:
 
 # 将标签转换为独热编码
 def one_hot_encode(labels):
-   num_classes = len(np.unique(labels))
-   one_hot_labels = np.zeros((len(labels), num_classes))
-   for i, label in enumerate(labels):
-       one_hot_labels[i][label] = 1
-   return one_hot_labels
+    num_classes = len(np.unique(labels))
+    one_hot_labels = np.zeros((len(labels), num_classes))
+    for i, label in enumerate(labels):
+        one_hot_labels[i][label] = 1
+    return one_hot_labels
 
 # 构建神经网络
 input_size = X_train.shape[1]
